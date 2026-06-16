@@ -19,7 +19,8 @@ try {
 if(!parseData.success){
     return res.status(400).json({
         success:false,
-        message:"Validation failed"
+        message:"Validation failed",
+        errors: parseData.error.format()
     })
 }
 
@@ -37,9 +38,11 @@ return res.status(200).json({
 })
 } catch (error) {
     console.log(error)
+    const message = error instanceof Error ? error.message : "error at login server"
     return res.status(500).json({
         success:false,
-        message:"error at the Login"
+        message
+
     })
 }
 

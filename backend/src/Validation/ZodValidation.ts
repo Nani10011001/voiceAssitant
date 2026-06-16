@@ -1,4 +1,4 @@
-import {email, string, z} from "zod"
+import {email, number, string, z} from "zod"
 
 export const LoginSchema = z.object(
     {
@@ -7,3 +7,8 @@ export const LoginSchema = z.object(
     
     }
 ).strict()
+
+export const FormSchemaValidate = z.object({
+    name:string(),
+    phoneNumber:string()
+}).strict()

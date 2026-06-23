@@ -2,6 +2,7 @@
 import React, { useState, type SyntheticEvent } from "react"
 import landpageImage from "./assets/coffeDesign.webp"
 import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
 
 const App = () => {
 interface infoSchema {
@@ -14,20 +15,32 @@ name:"",
 phoneNumber:""
 
   })
+  const [isLoading,setIsLoading] = useState<boolean>(false)
+
   const submitHandler = async(e:SyntheticEvent<HTMLFormElement>)=>{
     e.preventDefault()
     const {name,phoneNumber} = info
     if(!name || !phoneNumber){
-      alert("all fields are required")
+return toast.error("all fields are requried")
     }
+    setIsLoading(true)
+
 const {data} = await axios.post("http://localhost:4000/api/form/v1",info)
 if(data.success){
-  alert("data create info successfully")
+  toast.success("data create info successfully")
+  setInfo({
+    name:"",
+    phoneNumber:""
+  })
+setIsLoading(false)
 }
   }
   return (
+ 
     <main className='h-screen w-full relative'>
+      <ToastContainer/>
  <img src={landpageImage} alt="" className='w-full h-screen object-cover' />
+    
  <section className='z-40 px-20 absolute inset-0 flex flex-col justify-center  items-start'>
  <div className='flex flex-col max-w-2xl '>
    <h1 className='text-3xl font-bold my-3 text-[#000] '>
@@ -56,9 +69,13 @@ className=' border-2 border-slate-400 rounded-2xl focus:outline-none placeholder
 className=' border-2 border-slate-400 rounded-2xl focus:outline-none placeholder:px-2 py-2 px-5' placeholder='Phone Number' />
 </div>
 <div className='flex flex-col gap-2'>
-  <button 
+  {
+    isLoading ?(<button 
   type="submit"
-  className='bg-pink-400 px-4 py-2 max-w-[40%] hover:scale-102 cursor-pointer transition-all text-white font-semibold rounded-2xl shadow-2xs shadow-slate-400'> Get Consultation </button>
+  className='bg-pink-400 px-4 py-2 cursor-not-allowed max-w-[50%] hover:scale-102  transition-all text-white font-semibold rounded-2xl shadow-2xs flex gap-2 shadow-slate-400'> <span className="border-t-0 border-2 border-white p-3 animate-spin rounded-full "></span>  Consultationing... </button>):(<button 
+  type="submit"
+  className='bg-pink-400 px-4 py-2 max-w-[40%] hover:scale-102 cursor-pointer transition-all text-white font-semibold rounded-2xl shadow-2xs shadow-slate-400'> Get Consultation </button>)
+  }
   <div className='flex flex-col gap-2'>
     <p className='text-slate-500 text-sm font-bold'> 
 

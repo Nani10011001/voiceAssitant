@@ -26,6 +26,7 @@ try {
     phoneNumber:phoneNumber
 
     })
+    const {name,phoneNumber} = formShema
     return {formShema}
 } catch (error) {
     console.log(error)

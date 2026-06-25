@@ -16,7 +16,19 @@ phoneNumber:""
 
   })
   const [isLoading,setIsLoading] = useState<boolean>(false)
+  const [showSuccess,setShowSuccess] = useState<boolean>(false)
 
+const startConversation = async ()=>{
+try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+    audio: true
+  })
+  const ws = new WebSocket("ws://localhost:4000")
+  console.log(stream)
+} catch (error) {
+  console.error("error starConversation: ",error)
+}
+}
   const submitHandler = async(e:SyntheticEvent<HTMLFormElement>)=>{
     e.preventDefault()
     const {name,phoneNumber} = info
@@ -33,6 +45,8 @@ if(data.success){
     phoneNumber:""
   })
 setIsLoading(false)
+setShowSuccess(true)
+
 }
   }
   return (
@@ -50,7 +64,13 @@ Find Your <span className='text-pink-400'> Perfect Property</span>
      Assistant will contact you to understand your property requirements.</p>
  </div>
 
-  <form action="" onSubmit={submitHandler} className='flex flex-col gap-3 mt-3 '>
+  {
+    showSuccess ?(<button
+  onClick={startConversation}
+   className='bg-pink-400 px-4 py-2 max-w-[40%] hover:scale-102 cursor-pointer my-3 transition-all text-white font-semibold rounded-2xl shadow-2xs shadow-slate-400'>
+  🎤 Start AI Conversation
+</button>):(
+      <form action="" onSubmit={submitHandler} className='flex flex-col gap-3 mt-3 '>
 
 <div className='flex gap-3'>
   <input type="text" 
@@ -90,6 +110,8 @@ className=' border-2 border-slate-400 rounded-2xl focus:outline-none placeholder
 </div>
 
 </form>
+    )
+  }
 
  </section>
     </main>

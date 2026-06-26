@@ -25,13 +25,14 @@ export class FormControllerService {
                 })
             }
             const {formShema} = await this.FormServeData.formDataFun(parseData.data)
-            const {id,name,phoneNumber} = formShema
+            
            
             return res.status(200).json({
                 success:true,
                 message:"form is created successfully",
                 formInfo:{
-                    formDetails:formShema
+                    formSessionId: formShema.sessionId
+                    
                 }
             })
 

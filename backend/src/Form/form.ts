@@ -1,6 +1,6 @@
 import { success } from "zod";
 import { FormdbSchema } from "./dbSchema/formSchema.js";
-
+import { randomUUID } from "crypto";
 interface formInterface {
     name:string;
     phoneNumber:string
@@ -20,9 +20,11 @@ try {
       if(phoneNumberAleardyExist){
         throw new Error("phone Number already exist ")
       }
-
+  const sessionId = randomUUID()
+  console.log(sessionId)
     const formShema = await FormdbSchema.create({
     name:name,
+    sessionId:sessionId,
     phoneNumber:phoneNumber
 
     })

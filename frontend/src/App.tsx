@@ -18,12 +18,27 @@ phoneNumber:""
   const [isLoading,setIsLoading] = useState<boolean>(false)
   const [showSuccess,setShowSuccess] = useState<boolean>(false)
 
+
+
 const startConversation = async ()=>{
 try {
     const stream = await navigator.mediaDevices.getUserMedia({
     audio: true
   })
-  const ws = new WebSocket("ws://localhost:4000")
+  const ws = new WebSocket("ws://localhost:4000/ws")
+  const sessionId = sessionStorage.getItem("sessionId")
+  if(!sessionId) return 
+  ws.onopen = ()=>{
+    ws.send(
+      JSON.stringify({
+        type:"start",
+        sessionId
+      })
+    )
+  }
+  ws.onmessage = (event) => {
+  console.log(event.data);
+};
   console.log(stream)
 } catch (error) {
   console.error("error starConversation: ",error)
@@ -44,6 +59,11 @@ if(data.success){
     name:"",
     phoneNumber:""
   })
+  const seesionIdData = data.formInfo.formSessionId
+ 
+   sessionStorage.setItem("sessionId",seesionIdData)
+
+
 setIsLoading(false)
 setShowSuccess(true)
 

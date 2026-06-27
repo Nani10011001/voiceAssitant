@@ -1,5 +1,5 @@
 
-import React, { useState, type SyntheticEvent } from "react"
+import React, { useRef, useState, type SyntheticEvent } from "react"
 import landpageImage from "./assets/coffeDesign.webp"
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -17,17 +17,25 @@ phoneNumber:""
   })
   const [isLoading,setIsLoading] = useState<boolean>(false)
   const [showSuccess,setShowSuccess] = useState<boolean>(false)
+  const [isConv, setIsConv] = useState<boolean>(false)
+  const wsRef = useRef<WebSocket | null>(null);
+  const recorderRef = useRef<MediaRecorder | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
 
 
 const startConversation = async ()=>{
 try {
-    const stream = await navigator.mediaDevices.getUserMedia({
+
+
+    let stream = await navigator.mediaDevices.getUserMedia({
     audio: true
   })
-  const ws = new WebSocket("ws://localhost:4000/ws")
+  setIsConv(true)
+  let ws = new WebSocket("ws://localhost:8000/ws")
   const sessionId = sessionStorage.getItem("sessionId")
   if(!sessionId) return 
+  let recorder = new MediaRecorder(stream)
   ws.onopen = ()=>{
     ws.send(
       JSON.stringify({
@@ -35,14 +43,43 @@ try {
         sessionId
       })
     )
+    recorder.start(250) //records in 250ms chunks
+  }
+  wsRef.current = ws
+  recorderRef.current = recorder;
+  streamRef.current = stream
+  recorder.ondataavailable = async (events) => {
+    if(events.data.size > 0 && ws.readyState === WebSocket.OPEN)
+    {
+      console.log("Chunk:", events.data.size);
+      const buffer = await events.data.arrayBuffer()
+      ws.send(buffer)
+    }
   }
   ws.onmessage = (event) => {
-  console.log(event.data);
+console.log(event.data)
 };
   console.log(stream)
 } catch (error) {
   console.error("error starConversation: ",error)
 }
+}
+const stopConversation = async () =>{
+  try {
+    recorderRef.current?.stop(); // stop recording
+   setIsConv(false)
+    //stip microphone
+    streamRef.current?.getTracks().forEach((track)=>{
+ track.stop()
+    })
+    wsRef.current?.close(1000, "Conversation ended");
+    // clear refs
+    recorderRef.current = null;
+    streamRef.current = null;
+    wsRef.current = null
+  } catch (error) {
+    console.error("error at stopConversation: ",error)
+  }
 }
   const submitHandler = async(e:SyntheticEvent<HTMLFormElement>)=>{
     e.preventDefault()
@@ -85,11 +122,29 @@ Find Your <span className='text-pink-400'> Perfect Property</span>
  </div>
 
   {
-    showSuccess ?(<button
-  onClick={startConversation}
-   className='bg-pink-400 px-4 py-2 max-w-[40%] hover:scale-102 cursor-pointer my-3 transition-all text-white font-semibold rounded-2xl shadow-2xs shadow-slate-400'>
-  🎤 Start AI Conversation
-</button>):(
+    showSuccess ? (
+      <div className='flex flex-col gap-4 mt-3'>
+        <p className='text-lg font-semibold text-slate-700'>Submission successful. Ready to start audio conversation.</p>
+        <div className='flex gap-3'>
+          <button
+            type='button'
+            onClick={startConversation}
+            className='bg-pink-400 px-4 py-2 cursor-pointer text-white font-semibold rounded-2xl shadow-2xs'
+          >
+            Start Conversation
+          </button>
+          {isConv && (
+            <button
+              type='button'
+              onClick={stopConversation}
+              className='bg-red-400 px-4 py-2 text-white font-semibold rounded-2xl shadow-2xs'
+            >
+              Stop Conversation
+            </button>
+          )}
+        </div>
+      </div>
+    ) : (
       <form action="" onSubmit={submitHandler} className='flex flex-col gap-3 mt-3 '>
 
 <div className='flex gap-3'>

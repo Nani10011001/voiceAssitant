@@ -13,6 +13,7 @@ async def AgentChat(req:dict):
     try:
         if not req.name or not req.phoneNumber:
                 ValueError("all value are required")
+                
     except Exception as e:
          print(f"error at the agentRouter: {e}")
          raise

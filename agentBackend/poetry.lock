@@ -223,6 +223,28 @@ files = [
 ]
 
 [[package]]
+name = "deepgram-sdk"
+version = "7.4.0"
+description = ""
+optional = false
+python-versions = "<4.0,>=3.10"
+groups = ["main"]
+files = [
+    {file = "deepgram_sdk-7.4.0-py3-none-any.whl", hash = "sha256:713a84c22dfdb87fa37f44b36ece47938580e3343815254cc19fcaffff9915c5"},
+    {file = "deepgram_sdk-7.4.0.tar.gz", hash = "sha256:0d35f830bcaa01196e3546b8c326f1d872f8fa52fc841c5640c2d68ef6678a03"},
+]
+
+[package.dependencies]
+httpx = ">=0.21.2"
+pydantic = ">=1.9.2"
+pydantic-core = ">=2.18.2,<3.0.0"
+typing_extensions = ">=4.0.0"
+websockets = ">=12.0"
+
+[package.extras]
+aiohttp = ["aiohttp (>=3.14.0,<4) ; python_version >= \"3.10\"", "httpx-aiohttp (==0.1.8) ; python_version >= \"3.10\""]
+
+[[package]]
 name = "distro"
 version = "1.9.0"
 description = "Distro - an OS platform information API"
@@ -1627,4 +1649,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0.0"
-content-hash = "93934379e6eb062c60191dc4a6fc9b590473e2460f88c52ad7563d5f17799b55"
+content-hash = "48703c3380da9b2f218bb134140e58044d2386ed469018d489587f1ea548df94"

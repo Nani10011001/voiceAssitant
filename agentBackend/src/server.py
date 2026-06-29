@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from Agents.service.AgentService import AgentRouter,AgentVapi
-from websocket.websocket import websocketRouter
+from websocket.websocket import websocket_router
 
 
 app = FastAPI()
@@ -8,7 +8,7 @@ app = FastAPI()
 
 app.include_router(AgentRouter)
 app.include_router(AgentVapi)
-app.include_router(websocketRouter)
+app.include_router(websocket_router)
 
 @app.get("/hello-docs")
 def get_data(): 

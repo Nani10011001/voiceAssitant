@@ -1,8 +1,7 @@
-
 import { success } from "zod";
 import { LoginSchema } from "../Validation/ZodValidation.js";
 import { Authservice } from "./login.js";
-import {type Request,type Response } from "express";
+import {type NextFunction, type Request,type Response } from "express";
 
 
 export class AuthController{
@@ -47,6 +46,10 @@ return res.status(200).json({
 }
 
 }
+authmiddlewareController(req: Request, res: Response,next:NextFunction){
 
+    
+
+}
 
 }

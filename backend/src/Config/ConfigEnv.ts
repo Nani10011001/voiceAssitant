@@ -14,4 +14,5 @@ dotenv.config(
 if(!process.env.PORT) console.log("---PORT--- is undefined")
 if(!process.env.MONG_URL) console.log("MONG_URL is undefined")
 if(!process.env.VAPI_ASSISTANT_ID) console.log("VAPI_ASSISTANT_IDL is undefined")
+if(!process.env.JWTSERECT) console.log("VAPI_ASSISTANT_IDL is undefined")
     

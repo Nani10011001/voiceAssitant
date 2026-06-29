@@ -1,21 +1,47 @@
-from fastapi import WebSocket,APIRouter
+import json
+import os
+from dotenv import load_dotenv
+from fastapi import APIRouter, WebSocket
+from fastapi.websockets import WebSocketDisconnect
+from Agents.graph.graph import agent
+from Deepgram.deepgram_stt_service import DeepgramService
 
-websocketRouter = APIRouter()
+load_dotenv()
 
-@websocketRouter.websocket("/ws")
-async def webSocketAudio(web: WebSocket):
-    await web.accept()
+websocket_router = APIRouter()
+deepgram_api_key = os.environ["DEEPGRAM_API_KEY"]
+
+
+@websocket_router.websocket("/ws")
+async def websocket_audio(websocket: WebSocket):
+    await websocket.accept()
+    deepgram = DeepgramService(deepgram_api_key, websocket=websocket, agent=agent)
+    await deepgram.connect_stt()
+
     try:
-       while True:
-         data = await web.receive_text()
-         print(data)
+        while True:
+            message = await websocket.receive()
+            if message["type"] == "websocket.disconnect":
+                break
 
-         await web.send_text("Connected")
+            if message.get("type") != "websocket.receive":
+                continue
 
-    except  Exception as e:
-       print("Client disconnection")
-       
-      
+            if message.get("text"):
+                try:
+                    payload = json.loads(message["text"])
+                except json.JSONDecodeError:
+                    continue
 
+                if payload.get("type") == "start":
+                    continue
 
+            if message.get("bytes"):
+                await deepgram.send_audio(message["bytes"])
 
+    except WebSocketDisconnect:
+        print("Client disconnected: WebSocketDisconnect")
+    except Exception as e:
+        print(f"Client disconnected: {type(e).__name__}: {e}")
+    finally:
+        await deepgram.close()

@@ -2,18 +2,18 @@ import asyncio
 from deepgram import AsyncDeepgramClient
 from deepgram.core.events import EventType
 from deepgram.listen.v1.types.listen_v1results import ListenV1Results
-from langchain_core.messages import  HumanMessage
+
 class DeepgramService:
 
-    def __init__(self, api_key: str, websocket=None, agent=None):
+    def __init__(self, api_key: str):
         if not api_key:
             raise ValueError("Deepgram API key is required")
         self.client = AsyncDeepgramClient(api_key=api_key)
         self.connection = None
         self._listen_task = None
         self._cm = None
-        self.websocket = websocket
-        self.agent = agent
+        
+        self.transcript_queue = asyncio.Queue()
 
     async def connect_stt(self):
         """Connect to Deepgram Speech-to-Text."""
@@ -48,26 +48,19 @@ class DeepgramService:
 
     async def _on_message(self, *args, **kwargs):
         result = kwargs.get("data") or (args[0] if args else None)
+
         if not isinstance(result, ListenV1Results):
             return
 
         transcript = result.channel.alternatives[0].transcript
+
         if not transcript:
             return
 
-        print("User:", transcript)
-
-        # Only invoke agent on final results, not interim
         if not result.is_final:
             return
-
-        if self.agent and self.websocket:
-            response = self.agent.invoke({
-                "messages": [HumanMessage(content=transcript)]
-            })
-            ai_text = response["messages"][-1].content
-            print("Agent:", ai_text)
-            await self.websocket.send_text(ai_text)
+        print("User:", transcript)
+        await self.transcript_queue.put(transcript)
 
     async def _on_error(self, *args, **kwargs):
         error = kwargs.get("data") or (args[0] if args else args)

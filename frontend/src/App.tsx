@@ -29,14 +29,15 @@ try {
 
 
     let stream = await navigator.mediaDevices.getUserMedia({
-    audio: true
-  })
+    audio: true})
   setIsConv(true)
   let ws = new WebSocket("ws://localhost:8000/ws")
+  ws.binaryType = "arraybuffer"
   const sessionId = sessionStorage.getItem("sessionId")
   if(!sessionId) return 
   let recorder = new MediaRecorder(stream)
   ws.onopen = ()=>{
+    console.log("websocket is connted")
     ws.send(
       JSON.stringify({
         type:"start",
@@ -45,6 +46,12 @@ try {
     )
     recorder.start(250) //records in 250ms chunks
   }
+  ws.onclose = () => {
+    console.log("WebSocket Closed");
+};
+  ws.onerror = (e) => {
+    console.log(e);
+};
   wsRef.current = ws
   recorderRef.current = recorder;
   streamRef.current = stream
@@ -56,8 +63,29 @@ try {
       ws.send(buffer)
     }
   }
-  ws.onmessage = (event) => {
-console.log(event.data)
+ ws.onmessage = async (event) => {
+
+    if (typeof event.data === "string") {
+        console.log(event.data);
+        return;
+    }
+
+    const audioBlob = new Blob(
+        [event.data],
+        {
+            type: "audio/mpeg"
+        }
+    );
+
+    const url = URL.createObjectURL(audioBlob);
+
+    const audio = new Audio(url);
+
+    await audio.play();
+
+    audio.onended = () => {
+        URL.revokeObjectURL(url);
+    };
 };
   console.log(stream)
 } catch (error) {

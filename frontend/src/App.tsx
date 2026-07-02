@@ -21,15 +21,42 @@ phoneNumber:""
   const wsRef = useRef<WebSocket | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
+  const audioQueue = useRef<Blob[]>([])
+  const isPlaying = useRef(false)
+const playNext = async ()=> {
+  if (isPlaying.current) return
+  const blob = audioQueue.current.shift()
+  if (!blob) return
+  isPlaying.current =true;
 
+  const url =URL.createObjectURL(blob)
+  const audio = new Audio(url)
+  audio.onended = () =>{
+    URL.revokeObjectURL(url);
+    isPlaying.current =false;
+    playNext()
+  }
+  try {
+    await audio.play();
 
+  }
+  catch(error){
+    console.error(error);
+    isPlaying.current =false
+    playNext()
+  }
+}
 
 const startConversation = async ()=>{
 try {
 
 
     let stream = await navigator.mediaDevices.getUserMedia({
-    audio: true})
+   audio: {
+    echoCancellation: true,
+    noiseSuppression: true,
+    autoGainControl: true,
+}})
   setIsConv(true)
   let ws = new WebSocket("ws://localhost:8000/ws")
   ws.binaryType = "arraybuffer"
@@ -63,29 +90,19 @@ try {
       ws.send(buffer)
     }
   }
- ws.onmessage = async (event) => {
-
+ ws.onmessage = (event) => {
     if (typeof event.data === "string") {
         console.log(event.data);
         return;
     }
 
-    const audioBlob = new Blob(
-        [event.data],
-        {
-            type: "audio/mpeg"
-        }
-    );
+    const blob = new Blob([event.data], {
+        type: "audio/mpeg",
+    });
 
-    const url = URL.createObjectURL(audioBlob);
+    audioQueue.current.push(blob);
 
-    const audio = new Audio(url);
-
-    await audio.play();
-
-    audio.onended = () => {
-        URL.revokeObjectURL(url);
-    };
+    playNext();
 };
   console.log(stream)
 } catch (error) {
@@ -105,6 +122,8 @@ const stopConversation = async () =>{
     recorderRef.current = null;
     streamRef.current = null;
     wsRef.current = null
+    audioQueue.current =[]
+    isPlaying.current =false
   } catch (error) {
     console.error("error at stopConversation: ",error)
   }

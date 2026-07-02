@@ -20,6 +20,7 @@ class DeepgramService:
         self._cm = self.client.listen.v1.connect(
             model="nova-3",
             encoding="opus",
+           
         )
         self.connection = await self._cm.__aenter__()
 
@@ -53,13 +54,20 @@ class DeepgramService:
             return
 
         transcript = result.channel.alternatives[0].transcript
-
+     
         if not transcript:
             return
 
         if not result.is_final:
             return
-        print("User:", transcript)
+        if not result.speech_final:
+            return
+        print(
+    f"Transcript: '{transcript}' | "
+    f"is_final={result.is_final} | "
+    f"speech_final={result.speech_final}"
+)
+        print("Usedeepr:", transcript)
         await self.transcript_queue.put(transcript)
 
     async def _on_error(self, *args, **kwargs):

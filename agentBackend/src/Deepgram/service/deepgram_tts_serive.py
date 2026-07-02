@@ -13,9 +13,5 @@ class Deepgram_TTS_service:
             text=text,
             model="aura-2-athena-en"
         )
-        for chunk in response:
-            print(type(chunk))
-            print(chunk)
-            break
-        
-        return response
+        print(type(response))
+        return b"".join(response)

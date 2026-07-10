@@ -16,6 +16,7 @@ dependencies = [
     "deepgram-sdk (>=7.4.0,<8.0.0)",
     "llama-index (>=0.14.23,<0.15.0)",
     "llama-parse (>=0.6.94,<0.7.0)",
+    "upstash-redis (>=1.7.0,<2.0.0)",
 ]
 
 

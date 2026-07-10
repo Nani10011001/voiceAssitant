@@ -3096,6 +3096,21 @@ files = [
 typing-extensions = ">=4.12.0"
 
 [[package]]
+name = "upstash-redis"
+version = "1.7.0"
+description = "Serverless Redis SDK from Upstash"
+optional = false
+python-versions = "<4.0,>=3.8"
+groups = ["main"]
+files = [
+    {file = "upstash_redis-1.7.0-py3-none-any.whl", hash = "sha256:6c17b4cd1f88bd0d34d978b9cf13041032482f7dfb4cdf8e00f6f6277db0006a"},
+    {file = "upstash_redis-1.7.0.tar.gz", hash = "sha256:19b46dff2d81b89da5cbfb23a38232f7ca3b9ba441b22a1df766c64972d936d1"},
+]
+
+[package.dependencies]
+httpx = ">=0.23.0,<1"
+
+[[package]]
 name = "urllib3"
 version = "2.7.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
@@ -3848,4 +3863,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0.0"
-content-hash = "d1f220e8a71115d0f524131d733a90042d330710212d29d135b372861ad5b53e"
+content-hash = "afb62e42b3d2c5c7a97c1e58337f929cdf87c9356c14a1bea3fb637c1f9080a1"

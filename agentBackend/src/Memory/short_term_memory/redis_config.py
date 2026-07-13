@@ -1,6 +1,8 @@
-from upstash_redis import Redis
+import asyncio
+from upstash_redis.asyncio import Redis
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 class RedisServer:
     def __init__(self,url,api_key):
@@ -11,16 +13,42 @@ class RedisServer:
         self.url = url
         self.redis =Redis(url=self.url,token=self.api_key)
 
-    def redis_set(self,session_id ,user_msg,ttl:int = 1800):
-        key = f"session: {session_id}"
-        self.redis.set(key,user_msg,ex=ttl)
-        print("data is redis set")
+    async def redis_set(self,session_id ,user_msg,ttl:int = 1800):
+        try:
 
-    def redis_get(self,session_id):
-        key = f"session: {session_id}"
-        return self.redis.get(key=key)
+            key = f"session: {session_id}"
+            pipe = self.redis.pipeline()
+            pipe.lpush(key, user_msg)
+            pipe.expire(key,ttl)
+            await pipe.exec()
+            logger.info("data is redis set done")
+        except Exception as e:
+            logger.error("error at push the message")
+            raise
 
-    def redis_delete(self,session_id):
-        key = f"session: {session_id}"
-        self.redis.delete(key)
 
+    async def redis_get(self,session_id):
+        try:
+            key = f"session: {session_id}"
+            return await self.redis.lrange(key, -10, -1)
+        except Exception as e:
+            logger.error("--error at redis_get--",e)
+            raise
+
+        
+    
+
+    async def redis_delete(self,session_id):
+        key = f"session: {session_id}"
+        await self.redis.delete(key)
+
+async def main():
+    redis = RedisServer()
+ 
+   
+    pop_message = await redis.redis_delete(session_id="nani1234")
+    get_message = await redis.redis_get(session_id="nani123")
+    print(get_message)
+    print(pop_message)
+if __name__ == "__main__":
+    asyncio.run(main())

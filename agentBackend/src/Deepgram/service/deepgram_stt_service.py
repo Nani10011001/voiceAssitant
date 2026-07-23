@@ -1,4 +1,5 @@
 import asyncio
+from typing import Awaitable, Callable
 from deepgram import AsyncDeepgramClient
 from deepgram.core.events import EventType
 from deepgram.listen.v1.types.listen_v1results import ListenV1Results
@@ -17,6 +18,7 @@ class DeepgramService:
         self._keepalive_task = None
 
         self.transcript_queue = asyncio.Queue()
+        self.on_user_speaking: Callable[[], Awaitable[None]] | None = None
 
     async def connect_stt(self):
         """Connect to Deepgram Speech-to-Text."""
@@ -99,8 +101,17 @@ class DeepgramService:
 
         if not transcript:
             return
+
         if not result.is_final:
+            if len(transcript.strip()) >= 3 and self.on_user_speaking:
+                try:
+                    await self.on_user_speaking()
+                except asyncio.CancelledError:
+                    raise
+                except Exception as e:
+                    print("Deepgram on_user_speaking callback error:", e)
             return
+
         if not result.speech_final:
             return
 

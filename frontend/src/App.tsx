@@ -23,27 +23,63 @@ phoneNumber:""
   const streamRef = useRef<MediaStream | null>(null)
   const audioQueue = useRef<Blob[]>([])
   const isPlaying = useRef(false)
+  const currentAudioRef = useRef<HTMLAudioElement | null>(null)
+  const audioUrlRef = useRef<string | null>(null)
+
+const stopCurrentAudio = () => {
+  if (currentAudioRef.current) {
+    currentAudioRef.current.pause()
+    currentAudioRef.current.currentTime = 0
+    currentAudioRef.current.src = ""
+    currentAudioRef.current = null
+  }
+
+  if (audioUrlRef.current) {
+    URL.revokeObjectURL(audioUrlRef.current)
+    audioUrlRef.current = null
+  }
+
+  audioQueue.current = []
+  isPlaying.current = false
+}
+
 const playNext = async ()=> {
   if (isPlaying.current) return
   const blob = audioQueue.current.shift()
   if (!blob) return
-  isPlaying.current =true;
+  isPlaying.current = true;
 
-  const url =URL.createObjectURL(blob)
+  if (audioUrlRef.current) {
+    URL.revokeObjectURL(audioUrlRef.current)
+    audioUrlRef.current = null
+  }
+
+  const url = URL.createObjectURL(blob)
+  audioUrlRef.current = url
   const audio = new Audio(url)
-  audio.onended = () =>{
-    URL.revokeObjectURL(url);
-    isPlaying.current =false;
+  currentAudioRef.current = audio
+
+  const cleanup = () => {
+    if (currentAudioRef.current === audio) {
+      currentAudioRef.current = null
+    }
+    if (audioUrlRef.current === url) {
+      URL.revokeObjectURL(url)
+      audioUrlRef.current = null
+    }
+    isPlaying.current = false
     playNext()
   }
+
+  audio.onended = cleanup
+  audio.onerror = cleanup
+
   try {
     await audio.play();
-
   }
   catch(error){
     console.error(error);
-    isPlaying.current =false
-    playNext()
+    cleanup()
   }
 }
 
@@ -92,8 +128,17 @@ try {
   }
  ws.onmessage = (event) => {
     if (typeof event.data === "string") {
-        console.log(event.data);
-        return;
+      try {
+        const payload = JSON.parse(event.data)
+        if (payload?.type === "stop_audio") {
+          stopCurrentAudio()
+          return
+        }
+        console.log(payload)
+      } catch (err) {
+        console.log(event.data)
+      }
+      return;
     }
 
     const blob = new Blob([event.data], {
@@ -118,6 +163,7 @@ const stopConversation = async () =>{
  track.stop()
     })
     wsRef.current?.close(1000, "Conversation ended");
+    stopCurrentAudio()
     // clear refs
     recorderRef.current = null;
     streamRef.current = null;

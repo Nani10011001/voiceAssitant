@@ -7,9 +7,11 @@ class Deepgram_TTS_service:
         self.client = AsyncDeepgramClient(api_key=api_key)
 
     async def speak(self, text: str) -> bytes:
-        """Generate audio from text using Deepgram TTS (non-blocking)."""
-        response = await self.client.speak.v1.audio.generate(
+        chunks = []
+        async for chunk in self.client.speak.v1.audio.generate(
             text=text,
-            model="aura-2-athena-en"
-        )
-        return b"".join(response)
+            model="aura-2-athena-en",
+            encoding="mp3"
+        ):
+            chunks.append(chunk)
+        return b"".join(chunks)

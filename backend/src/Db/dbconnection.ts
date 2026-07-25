@@ -9,4 +9,4 @@ export const dbconnection  = async() => {
         console.log("error at db connection: ",error)
         process.exit(1)
     }
-}
+} 

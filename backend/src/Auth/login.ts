@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 import { email } from "zod";
-
+import { AuthFailureResponse } from "../core/apireponse.js";
 interface LoginSchema {
 email:string;
 password:string
@@ -21,7 +21,8 @@ if(!email || ! password){
 if(email !== process.env.ADMIN_EMAIL || password !== process.env.PASSWORD){
 
 
-throw new Error("unAuthorized")
+throw new AuthFailureResponse()
+
     }
 
     const jwtToken = jwt.sign({email},process.env.JWTSERECT!,{expiresIn:"7d"})

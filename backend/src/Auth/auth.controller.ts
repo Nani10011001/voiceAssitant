@@ -2,9 +2,10 @@ import { success } from "zod";
 import { LoginSchema } from "../Validation/ZodValidation.js";
 import { Authservice } from "./login.js";
 import {type NextFunction, type Request,type Response } from "express";
+import { ApiResponse, SuccessMsgResponse } from "../core/apireponse.js";
 
 
-export class AuthController{
+ export class AuthController{
 
     constructor(private Auth:Authservice){
 
@@ -31,12 +32,14 @@ secure:process.env.PRODUTIONDEV === "dev",
 maxAge:7*60*60*1000
 
 })
-return res.status(200).json({
-    success:true,
-    messages:"login successfully"
-})
+
+return new  SuccessMsgResponse("success").send(res)
 } catch (error) {
     console.log(error)
+    if (error instanceof ApiResponse) {
+        return error.send(res)
+    }
+
     const message = error instanceof Error ? error.message : "error at login server"
     return res.status(500).json({
         success:false,
@@ -46,10 +49,6 @@ return res.status(200).json({
 }
 
 }
-authmiddlewareController(req: Request, res: Response,next:NextFunction){
 
-    
-
-}
 
 }

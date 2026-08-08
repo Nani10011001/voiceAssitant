@@ -1,25 +1,33 @@
-import mongoose from "mongoose";
+import mongoose, { Types,Schema } from "mongoose";
 import { string } from "zod";
 import { required } from "zod/mini";
 
 
-const formSchema = new mongoose.Schema({
+interface formSchemaInterface {
+    _id?: Types.ObjectId, 
+    name:string,
+    sessionId: string,
+    phoneNumber: string
+}
+
+const formSchema = new mongoose.Schema<formSchemaInterface>({
 
     name:{
-        type:String,
+        type: Schema.Types.String,
      required:true
     },
+
     sessionId:{
-type:String,
+type:Schema.Types.String,
 required:true
 
 
     },
     phoneNumber:{
-        type:String,
+        type:Schema.Types.String,
         required:true,
         unique:true
     }
 })
-export const FormdbSchema = mongoose.model("formshema",formSchema)
+export const FormdbSchema = mongoose.model<formSchemaInterface>("formshema",formSchema)
 

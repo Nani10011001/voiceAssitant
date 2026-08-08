@@ -8,7 +8,7 @@ interface formInterface {
 
 export class FormService{
 
-    async formDataFun(formData:formInterface){
+    async formDataFun(formData:formInterface): Promise<{ formShema: any }> {
 try {
     
         const {name,phoneNumber} = formData

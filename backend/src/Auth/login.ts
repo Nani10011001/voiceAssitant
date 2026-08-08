@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 import { email } from "zod";
-import { AuthFailureResponse } from "../core/apireponse.js";
+import { AuthFailureResponse, BadRequestResponse } from "../core/apireponse.js";
 interface LoginSchema {
 email:string;
 password:string
@@ -14,7 +14,8 @@ const {email,password} = userInfo
 if(!email || ! password){
 
 
-    throw new Error("all fields are required")
+    throw new BadRequestResponse("all fields are required")
+    
 
 
 }

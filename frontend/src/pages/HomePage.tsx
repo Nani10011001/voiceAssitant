@@ -1,16 +1,20 @@
 import React, { useState, type SyntheticEvent } from 'react'
 import landpageImage from "../assets/coffeDesign.webp"
 import axios from 'axios'
-import { User, Phone} from 'lucide-react';
-import { toast } from "react-toastify";
+import { User, Phone } from 'lucide-react'
+import { toast } from "react-toastify"
+import MicSpeaker from '../components/MicSpeaker'
+
 type Props = {}
 
-const HomePage = (props: Props) => {
-  const [isLoading,setIsLoading] = useState<boolean>(false)
-  const [showSuccess,setShowSuccess] = useState<boolean>(false)
-  const [isConv, setIsConv] = useState<boolean>(false)
+const HomePage = (_props: Props) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [, setShowSuccess] = useState<boolean>(false)
+  const [showUi, setShowUi] = useState<boolean>(false)
 
-    
+  const handlerClose = () => {
+    setShowUi(false)
+  }
   interface infoSchema {
     name:string;
     phoneNumber:string
@@ -32,6 +36,9 @@ return toast.error("all fields are requried")
 
 const {data} = await axios.post("http://localhost:4000/api/form/v1",info)
 if(data.success){
+  const uiValue: boolean = data.success
+  console.log("uiValue: ",uiValue)
+ setShowUi(uiValue)
   toast.success("data create info successfully")
   setInfo({
     name:"",
@@ -50,7 +57,7 @@ setShowSuccess(true)
   return (
     <main className='h-screen w-full relative'>
       <img src={landpageImage} alt="" className='w-full h-screen object-cover' />
-
+ {showUi && <MicSpeaker onClose={handlerClose} />}
       <section className='z-40 px-20 absolute inset-0 flex flex-col justify-center  items-start'>
         <div className='flex flex-col max-w-2xl '>
           <h1 className='text-3xl font-bold my-3 text-[#000] '>

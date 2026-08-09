@@ -1,6 +1,6 @@
-import {  ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify"
 import HomePage from "./pages/HomePage.tsx"
-import MicSpeaker from "./components/MicSpeaker.tsx"
+
 const App = () => {
 
 
@@ -10,7 +10,7 @@ const App = () => {
     <div>
       <ToastContainer/>
 <HomePage/>
-<MicSpeaker/>
+
     </div>
   )
 }

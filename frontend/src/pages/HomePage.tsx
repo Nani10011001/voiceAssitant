@@ -10,10 +10,11 @@ type Props = {}
 const HomePage = (_props: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [, setShowSuccess] = useState<boolean>(false)
-  const [showUi, setShowUi] = useState<boolean>(false)
+  const [showUi, setShowUi] = useState<boolean>(true)
 
   const handlerClose = () => {
     setShowUi(false)
+    console.log("button clicked")
   }
   interface infoSchema {
     name:string;
@@ -36,9 +37,9 @@ return toast.error("all fields are requried")
 
 const {data} = await axios.post("http://localhost:4000/api/form/v1",info)
 if(data.success){
-  const uiValue: boolean = data.success
+/*   const uiValue: boolean = data.success
   console.log("uiValue: ",uiValue)
- setShowUi(uiValue)
+ setShowUi(uiValue) */
   toast.success("data create info successfully")
   setInfo({
     name:"",
@@ -57,7 +58,9 @@ setShowSuccess(true)
   return (
     <main className='h-screen w-full relative'>
       <img src={landpageImage} alt="" className='w-full h-screen object-cover' />
- {showUi && <MicSpeaker onClose={handlerClose} />}
+
+ {showUi && 
+ (<MicSpeaker onClose={handlerClose} />)}
       <section className='z-40 px-20 absolute inset-0 flex flex-col justify-center  items-start'>
         <div className='flex flex-col max-w-2xl '>
           <h1 className='text-3xl font-bold my-3 text-[#000] '>

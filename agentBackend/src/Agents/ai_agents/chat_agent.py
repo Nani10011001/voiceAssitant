@@ -13,7 +13,7 @@ groq_api_key= os.environ["GROQ_API"]
 if not groq_api_key:
     raise ValueError("groq api is undefined")
 
-llm_parser = LLM_provider(api_key=groq_api_key,model_name="llama-3.1-8b-instant")#gpt-oss-20b
+llm_parser = LLM_provider(api_key=groq_api_key,model_name="openai/gpt-oss-20b")#gpt-oss-20b
 api_key = os.environ["LLAMAPARSER_API_KEY"]
 pdf_path = r"C:\Users\nani9\OneDrive\Desktop\Projects\Agents\advanceVoiceAssistant\agentBackend\src\rag\Green_Valley_Residency_Brochure.pdf"
 

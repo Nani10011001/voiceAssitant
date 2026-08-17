@@ -10,7 +10,7 @@ type Props = {}
 const HomePage = (_props: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [, setShowSuccess] = useState<boolean>(false)
-  const [showUi, setShowUi] = useState<boolean>(true)
+  const [showUi, setShowUi] = useState<boolean>(false)
 
   const handlerClose = () => {
     setShowUi(false)
@@ -37,9 +37,9 @@ return toast.error("all fields are requried")
 
 const {data} = await axios.post("http://localhost:4000/api/form/v1",info)
 if(data.success){
-/*   const uiValue: boolean = data.success
+  const uiValue: boolean = data.success
   console.log("uiValue: ",uiValue)
- setShowUi(uiValue) */
+ setShowUi(uiValue) 
   toast.success("data create info successfully")
   setInfo({
     name:"",

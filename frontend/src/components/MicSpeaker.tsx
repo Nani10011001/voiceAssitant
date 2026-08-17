@@ -8,9 +8,15 @@ type Props = {
 
 const MicSpeaker = ({ onClose }: Props) => {
   const [listening, setListening] = useState(false);
-
+  const wsRef = useRef<WebSocket | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+ const MediaRecorderRef = useRef<MediaRecorder | null>(null)
   
   const startConversation = async() =>{
+    if(wsRef.current?.readyState === WebSocket.OPEN){
+      console.log("websocket is aleardy connected")
+      return;
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio:{
@@ -19,13 +25,54 @@ const MicSpeaker = ({ onClose }: Props) => {
           
         }
       })
+      streamRef.current = stream
       console.log("stream data: ", stream)
       const ws = new WebSocket("ws://localhost:8000/ws")
+      wsRef.current = ws
+      // frist i want make the type is array buffer things
+      ws.binaryType = "arraybuffer"
+
       setListening(true)
       ws.onopen = (
 
       ) =>{
+        const recorder = new MediaRecorder(stream,{
+          mimeType:"audio/webm"
+        })
+        MediaRecorderRef.current = recorder
+        recorder.ondataavailable = async (event) => {
+          if (event.data.size > 0 && ws.readyState === WebSocket.OPEN){
+            const arraybuffer = await event.data.arrayBuffer()
+            console.log(arraybuffer)
+            ws.send(arraybuffer)
+          }
+        }
+        recorder.start(250) // every 250 ms
+        
         console.log("connected websocket")
+      }
+
+      
+      ws.onmessage = async (event) =>{
+  console.log("recieving audio of it: ",event.data)
+
+  const audioBlob = new Blob(
+    [event.data],
+    {
+      type: "audio/mpeg"
+    }
+  );
+
+
+  console.log(
+    "audio size:",
+    audioBlob.size
+  );
+
+
+  const audioUrl = URL.createObjectURL(audioBlob);
+  const audio = new Audio(audioUrl);
+  await audio.play();
       }
       ws.onerror = (error)=>{
          console.log("websocket error: ",error)
@@ -36,6 +83,14 @@ const MicSpeaker = ({ onClose }: Props) => {
     } catch (error) {
       console.log("error at startConversation: ", error)
     }
+  }
+  const stopConversation = () =>{
+    MediaRecorderRef.current?.stop()
+    wsRef.current?.close()
+    streamRef.current?.getTracks().forEach(track => track.stop())
+    MediaRecorderRef.current = null
+    wsRef.current = null
+    streamRef.current = null
   }
  
   return (
@@ -66,7 +121,7 @@ const MicSpeaker = ({ onClose }: Props) => {
 }
 <div className="flex gap-7 justify-center ">
   <button onClick={startConversation} className="bg-pink-500 px-10 py-2 rounded-2xl cursor-pointer hover:scale-104 transition-all text-white font-medium">Start</button>
-  <button className="bg-red-500 rounded-2xl px-10 py-2 cursor-pointer hover:scale-104 transi text-white font-medium">Stop</button>
+  <button onClick={stopConversation} className="bg-red-500 rounded-2xl px-10 py-2 cursor-pointer hover:scale-104 transi text-white font-medium">Stop</button>
 </div>
 </div>
     </div>

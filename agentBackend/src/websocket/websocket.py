@@ -94,8 +94,7 @@ async def websocket_audio(websocket: WebSocket):
             transcript = await deepgram.transcript_queue.get()
             print(f"user: {transcript}")
 
-            # A new utterance implicitly interrupts whatever the agent was doing
-            await stop_current_response()
+          
 
             async def generate_and_speak():
                 try:

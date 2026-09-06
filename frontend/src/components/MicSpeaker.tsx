@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { Mic, MicOff, Sparkles, X } from "lucide-react";
 // WebSocket is available in the browser environment; remove Node import
+import { motion } from "framer-motion";
 
 type Props = {
   onClose: () => void;
@@ -91,6 +92,7 @@ const MicSpeaker = ({ onClose }: Props) => {
     MediaRecorderRef.current = null
     wsRef.current = null
     streamRef.current = null
+    console.log("button stoped")
   }
  
   return (
@@ -120,7 +122,26 @@ const MicSpeaker = ({ onClose }: Props) => {
  </div>
 }
 <div className="flex gap-7 justify-center ">
-  <button onClick={startConversation} className="bg-pink-500 px-10 py-2 rounded-2xl cursor-pointer hover:scale-104 transition-all text-white font-medium">Start</button>
+  <motion.button
+  initial={{
+    y:0,
+
+  }}
+  animate={{
+    
+  }}
+  whileHover={{
+    y: -3,
+    scale:1.1,
+ 
+
+  }}
+  whileTap={{
+    y:4,
+    scale:1
+
+  }}
+  onClick={startConversation} className="bg-pink-500 px-10 py-2 rounded-2xl cursor-pointer hover:scale-104 transition-all text-white font-medium">Start</motion.button>
   <button onClick={stopConversation} className="bg-red-500 rounded-2xl px-10 py-2 cursor-pointer hover:scale-104 transi text-white font-medium">Stop</button>
 </div>
 </div>

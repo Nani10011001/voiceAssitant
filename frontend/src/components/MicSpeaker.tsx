@@ -1,12 +1,25 @@
 import { useRef, useState } from "react";
 import { Mic, MicOff, Sparkles, X } from "lucide-react";
-// WebSocket is available in the browser environment; remove Node import
-import { motion } from "framer-motion";
 
+import { motion } from "framer-motion";
+import { type Variants } from "framer-motion";
 type Props = {
   onClose: () => void;
 };
+const micSpeakerAnimation: Variants = {
 
+  offsrceen:{
+    scale:0.70
+  },
+  onscreen:{
+    scale:1.03,
+    transition:{
+      duration:0.8,
+      ease:"easeInOut",
+  /*     animationIterationCount: */
+    }
+  }
+}
 const MicSpeaker = ({ onClose }: Props) => {
   const [listening, setListening] = useState(false);
   const wsRef = useRef<WebSocket | null>(null)
@@ -48,7 +61,7 @@ const MicSpeaker = ({ onClose }: Props) => {
             ws.send(arraybuffer)
           }
         }
-        recorder.start(250) // every 250 ms
+        recorder.start(500) // every 250 ms
         
         console.log("connected websocket")
       }
@@ -92,6 +105,7 @@ const MicSpeaker = ({ onClose }: Props) => {
     MediaRecorderRef.current = null
     wsRef.current = null
     streamRef.current = null
+    setListening(false)
     console.log("button stoped")
   }
  
@@ -112,7 +126,27 @@ const MicSpeaker = ({ onClose }: Props) => {
 </p>
 </div>
 <div className="w-full  flex justify-center mt-15 ">
-  <p className="px-7 py-7 text-white rounded-full border-4 border-red-500  bg-red-500 transform "><Mic size={50} /></p>
+  {
+    listening ? (
+      <motion.p 
+ initial="offscreen"
+ whileInView="onscreen"
+ variants={micSpeakerAnimation}
+
+  className="px-7 py-7 text-white rounded-full   bg-red-500 transform ">
+    <Mic size={30} /></motion.p>
+
+    ):(
+ <motion.p 
+ initial="offscreen"
+ whileInView="onscreen"
+ variants={micSpeakerAnimation}
+
+  className="px-7 py-7 text-white rounded-full   bg-slate-800 transform ">
+    <Mic size={30} /></motion.p>
+    )
+  }
+ 
 </div>
 {
  <div className="flex justify-center">
@@ -123,26 +157,25 @@ const MicSpeaker = ({ onClose }: Props) => {
 }
 <div className="flex gap-7 justify-center ">
   <motion.button
-  initial={{
-    y:0,
 
-  }}
-  animate={{
-    
-  }}
   whileHover={{
     y: -3,
-    scale:1.1,
+    scale:1.03,
  
 
   }}
   whileTap={{
-    y:4,
-    scale:1
+
+    scale:0.98
 
   }}
-  onClick={startConversation} className="bg-pink-500 px-10 py-2 rounded-2xl cursor-pointer hover:scale-104 transition-all text-white font-medium">Start</motion.button>
-  <button onClick={stopConversation} className="bg-red-500 rounded-2xl px-10 py-2 cursor-pointer hover:scale-104 transi text-white font-medium">Stop</button>
+  onClick={startConversation} className="bg-pink-500 px-10 py-2 rounded-2xl cursor-pointer  text-white font-medium">Start</motion.button>
+  <motion.button 
+  whileHover={{y:-3,
+    scale:1.03
+  }}
+  whileTap={{scale:0.98}}
+  onClick={stopConversation} className="bg-red-500 rounded-2xl px-10 py-2 cursor-pointer  text-white font-medium">Stop</motion.button>
 </div>
 </div>
     </div>

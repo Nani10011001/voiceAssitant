@@ -9,6 +9,6 @@ export const LoginSchema = z.object(
 ).strict()
 
 export const FormSchemaValidate = z.object({
-    name:string(),
-    phoneNumber:string()
+    name:z.string(),
+    phoneNumber:z.string()
 }).strict()

@@ -10,7 +10,7 @@ type Props = {}
 const HomePage = (_props: Props) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [, setShowSuccess] = useState<boolean>(false)
-  const [showUi, setShowUi] = useState<boolean>(true)
+  const [showUi, setShowUi] = useState<boolean>(false)
 
   const handlerClose = () => {
     setShowUi(false)

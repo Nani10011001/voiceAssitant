@@ -94,29 +94,37 @@ async def websocket_audio(websocket: WebSocket):
             transcript = await deepgram.transcript_queue.get()
             print(f"user: {transcript}")
 
-          
-
             async def generate_and_speak():
                 try:
                     ai_response = await conversation.chat(transcript)
-                    
+
                     print(f"agent: {ai_response}")
 
-                    await tts.speak(text=ai_response)
+                    # Generate complete MP3 from Deepgram
+                    audio = await tts.speak(text=ai_response)
+                    
+                    with open("test.mp3", "wb") as f:
+                        f.write(audio)
+
+                        print("Saved test.mp3")
+
+                    print(f"Sending MP3 audio: {len(audio)} bytes")
+
+                    # Send complete MP3 to browser
+                    await websocket.send_bytes(audio)
+
                 except asyncio.CancelledError:
                     print("Agent/TTS generation cancelled")
                     raise
+
                 except Exception as e:
                     print(f"Error in agent response: {e}")
                     traceback.print_exc()
 
-            async with task_lock:
-                agent_task = asyncio.create_task(generate_and_speak())
-
-            try:
-                await agent_task
-            except asyncio.CancelledError:
-                pass
+            if agent_task and not agent_task.done():
+                agent_task.cancel()
+                await asyncio.gather(agent_task, return_exceptions=True)
+            agent_task = asyncio.create_task(generate_and_speak())
 
     try:
         tasks = [

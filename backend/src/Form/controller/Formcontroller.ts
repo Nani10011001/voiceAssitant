@@ -31,8 +31,9 @@ export class FormControllerService {
                 success:true,
                 message:"form is created successfully",
                 formInfo:{
-                    formSessionId: formShema.sessionId
-                    
+                    formSessionId: formShema.sessionId,
+                    name: formShema.name,
+                    phoneNumber:formShema.phoneNumber
                 }
             })
 

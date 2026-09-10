@@ -19,6 +19,7 @@ class DeepgramService:
 
         self.transcript_queue = asyncio.Queue()
         self.on_user_speaking: Callable[[], Awaitable[None]] | None = None
+        self.user_is_speaking = False
 
     async def connect_stt(self):
         """Connect to Deepgram Speech-to-Text."""
@@ -91,6 +92,13 @@ class DeepgramService:
     async def _on_open(self, *_):
         print("Deepgram Connected")
 
+    async def _on_error(self, *args, **kwargs):
+        error = kwargs.get("error") or (args[0] if args else None)
+        print("Deepgram error:", error)
+
+    async def _on_close(self, *args, **kwargs):
+        print("Deepgram connection closed")
+
     async def _on_message(self, *args, **kwargs):
         result = kwargs.get("data") or (args[0] if args else None)
 
@@ -102,25 +110,30 @@ class DeepgramService:
         if not transcript:
             return
 
+        # User started speaking
         if not result.is_final:
-            if len(transcript.strip()) >= 3 and self.on_user_speaking:
+            if (
+                len(transcript.strip()) >= 3
+                and not self.user_is_speaking
+                and self.on_user_speaking
+            ):
+                self.user_is_speaking = True
+
                 try:
                     await self.on_user_speaking()
                 except asyncio.CancelledError:
                     raise
                 except Exception as e:
                     print("Deepgram on_user_speaking callback error:", e)
+
             return
 
+        # Only process completed speech
         if not result.speech_final:
             return
 
         print(f"Transcript: '{transcript}'")
+
+        self.user_is_speaking = False
+
         await self.transcript_queue.put(transcript)
-
-    async def _on_error(self, *args, **kwargs):
-        error = kwargs.get("data") or (args[0] if args else args)
-        print("Deepgram Error:", error)
-
-    async def _on_close(self, *_):
-        print("Deepgram Closed")

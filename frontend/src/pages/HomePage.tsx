@@ -47,8 +47,11 @@ if(data.success){
   })
   const seesionIdData = data.formInfo.formSessionId
  
+ 
    sessionStorage.setItem("sessionId",seesionIdData)
-
+   sessionStorage.setItem("user_name",data.formInfo.name)
+   sessionStorage.setItem("phone_number",data.formInfo.phoneNumber)
+   console.log("userPhoneNumber: ",data.formInfo.phoneNumber)
 
 setIsLoading(false)
 setShowSuccess(true)

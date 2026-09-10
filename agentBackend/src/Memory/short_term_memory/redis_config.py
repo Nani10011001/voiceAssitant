@@ -1,6 +1,7 @@
 import asyncio
 from upstash_redis.asyncio import Redis
 import logging
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -13,12 +14,17 @@ class RedisServer:
         self.url = url
         self.redis =Redis(url=self.url,token=self.api_key)
 
-    async def redis_set(self,session_id ,user_msg,ttl:int = 1800):
+    async def redis_set(self,session_id ,message,role, ttl:int = 1800):
         try:
 
-            key = f"session: {session_id}"
+            key = f"session:{session_id}"
+            message = {
+                "role":f"{role}",
+                "message":f"{message}"
+            }
             pipe = self.redis.pipeline()
-            pipe.lpush(key, user_msg)
+
+            pipe.rpush(key, message)
             pipe.expire(key,ttl)
             await pipe.exec()
             logger.info("data is redis set done")
@@ -29,8 +35,8 @@ class RedisServer:
 
     async def redis_get(self,session_id):
         try:
-            key = f"session: {session_id}"
-            return await self.redis.lrange(key, -10, -1)
+            key = f"session:{session_id}"
+            return await self.redis.lrange(key, 0, -1)
         except Exception as e:
             logger.error("--error at redis_get--",e)
             raise
@@ -39,7 +45,7 @@ class RedisServer:
     
 
     async def redis_delete(self,session_id):
-        key = f"session: {session_id}"
+        key = f"session:{session_id}"
         await self.redis.delete(key)
 
 async def main():

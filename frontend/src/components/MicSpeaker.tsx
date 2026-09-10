@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Mic, MicOff, Sparkles, X } from "lucide-react";
 
 import { motion } from "framer-motion";
+
 /* import { type Variants } from "framer-motion"; */
 type Props = {
   onClose: () => void;
@@ -58,7 +59,15 @@ const startConversation = async () => {
 
     ws.onopen = () => {
       console.log("connected websocket");
+      //sending the user information
+       ws.send(JSON.stringify({
+        type:"user_info",
+        sessionId:sessionStorage.getItem("sessionId"),
+        name: sessionStorage.getItem("user_name"),
+        phoneNumber: sessionStorage.getItem("phone_number")
 
+        
+      })) 
       const recorder = new MediaRecorder(stream, {
         mimeType: "audio/webm",
       });
@@ -124,7 +133,7 @@ const startConversation = async () => {
       if (event.data instanceof ArrayBuffer) {
 
         console.log(
-          "🔊 Received MP3:",
+          " Received MP3:",
           event.data.byteLength,
           "bytes"
         );

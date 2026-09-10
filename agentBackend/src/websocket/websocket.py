@@ -19,7 +19,11 @@ deepgram_api_key = os.environ["DEEPGRAM_API_KEY"]
 
 @websocket_router.websocket("/ws")
 async def websocket_audio(websocket: WebSocket):
+
     await websocket.accept()
+    session_id = None
+    name = None
+    phone_number = None
 
     deepgram = DeepgramService(api_key=deepgram_api_key)
     conversation = ConversationService(agent)
@@ -54,23 +58,23 @@ async def websocket_audio(websocket: WebSocket):
                 break
             if message.get("type") != "websocket.receive":
                 continue
-
+           
             if message.get("text"):
                 try:
                     payload = json.loads(message["text"])
                 except json.JSONDecodeError:
                     continue
 
-                """  if payload.get("type") == "start":
-                    greeting = (
-                        "Hello! Welcome to GREEN VALLEY RESIDENCY. "
-                        "I'm your AI real estate assistant. "
-                        "How can I help you today?"
-                    )
-                    
-                    await tts.speak(text=greeting)
+                if payload.get("type") == "user_info":
+                    nonlocal session_id, phone_number,name
+                    session_id = payload.get("sessionId")
+                    name = payload.get("name")
+                    phone_number = payload.get("phoneNumber")
+                    if not session_id or not name or not phone_number:
+                        print("Invalid user info")
+                        continue
+                    print("user_info",session_id,name,phone_number)
                     continue
-                """
                 if payload.get("type") == "interrupt":
                     print("Interrupt signal received")
                     await stop_current_response()
@@ -96,7 +100,7 @@ async def websocket_audio(websocket: WebSocket):
 
             async def generate_and_speak():
                 try:
-                    ai_response = await conversation.chat(transcript)
+                    ai_response = await conversation.chat(transcript,name=name,phone_number=phone_number,session_id=session_id)
 
                     print(f"agent: {ai_response}")
 

@@ -93,25 +93,41 @@ def routerDiside(state:Agent_state):
 @traceable(name="generalChatNode")
 def chatnode(state:Agent_state):
 
-    user_msg = state['messages'][-1].content
-    user_name = state["name"]
-    session_id = state["session_id"]
-    phone_number = state["phone_number"]
-    llm = llm_parser.llm()
-    response = llm.invoke([SystemMessage(content=chat_prompt(name=user_name,session_id=session_id,phone_number=phone_number)),HumanMessage(content=user_msg)])
-    return {
-        "messages":[response]
-    }
+    try:
+        user_msg = state['messages'][-1].content
+        user_name = state["name"]
+        session_id = state["session_id"]
+        phone_number = state["phone_number"]
+        llm = llm_parser.llm()
+        response = llm.invoke([SystemMessage(content=chat_prompt(name=user_name,session_id=session_id,phone_number=phone_number)),HumanMessage(content=user_msg)])
+        return {
+                "messages":[response]
+            }
+    except Exception as e:
+        print(f"---something went wrong at chatnode---: {e}")
+        AIMessage(content="something went wrong try again....")
+        
 @traceable(name="retiveNode")
-def retriveNodeChat(state: Agent_state):
-    user_msg = state["messages"][-1].content
-    user_name = state["name"]
-    session_id = state["session_id"]
-    phone_number = state["phone_number"]
-    rag_context = rag.get_context_text(query=user_msg)
-    llm = llm_parser.llm()
-    response = llm.invoke([SystemMessage(content=rag_prompt(retrieved_context=rag_context,user_query=user_msg,name=user_name,phone_number=phone_number,session_id=session_id))])
-    return {
-        "messages":[response]
+async def retriveNodeChat(state: Agent_state):
+    try:
 
-    }
+        user_msg = state["messages"][-1].content
+        user_name = state["name"]
+        session_id = state["session_id"]
+        phone_number = state["phone_number"]
+        await redis.redis_set(session_id=session_id,role="user",message=user_msg)
+        rag_context = rag.get_context_text(query=user_msg)
+        llm = llm_parser.llm()
+        response = llm.invoke([SystemMessage(content=rag_prompt(retrieved_context=rag_context,user_query=user_msg,name=user_name,phone_number=phone_number,session_id=session_id))])
+        await redis.redis_set(session_id=session_id,role="ai",message=response.content)
+        return {
+                "messages":[response]
+        
+            }
+    except Exception as e:
+        print(f"---something went wrong in the retriveNodeChat thing---: {e}")
+        AIMessage(
+            content="something went wrong try again..."
+        )
+
+    

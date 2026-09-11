@@ -7,6 +7,7 @@ class Deepgram_TTS_service:
         self.client = AsyncDeepgramClient(api_key=api_key)
 
     async def speak(self, text: str) -> bytes:
+        
         chunks = []
         async for chunk in self.client.speak.v1.audio.generate(
             text=text,
